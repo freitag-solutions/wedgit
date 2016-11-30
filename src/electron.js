@@ -11,7 +11,8 @@ let win;
 function createWindow() {
   // Create the browser window.
   // see: https://github.com/electron/electron/blob/master/docs/api/frameless-window.md
-  win = new BrowserWindow({width: 1200, height: 900, /*frame: false, transparent: true*/});
+  win = new BrowserWindow({ width: 600, height: 70, useContentSize: true, frame: false, transparent: false, resizable: false });
+
 
   // and load the index.html of the app.
   win.loadURL(`file://${__dirname}/../dist/index.html`);
