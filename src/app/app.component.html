@@ -1,7 +1,19 @@
-<md-toolbar style="width: 100%; height: 100%;">
+<div #main (resize)="onResize($event)">
+  <md-toolbar style="width: 100%; height: 100%;">
 
-  <md-icon>search</md-icon>
+    <md-icon>search</md-icon>
 
-  <md-input #searchInput placeholder="{{searchPlaceholder}}" floatingPlaceholder="false" class="main searchbar"></md-input>
+    <md-input #searchInput placeholder="{{searchPlaceholder}}" floatingPlaceholder="false" class="main searchbar" (input)="triggerSearch()"></md-input>
 
-</md-toolbar>
+  </md-toolbar>
+
+  <md-nav-list *ngIf="messages.length >  0">
+    <md-list-item *ngFor="let link of messages" style="color: black;">
+      <a md-line href="...">{{ link }}</a>
+      <button md-icon-button (click)="showInfo(link)">
+          <md-icon>info</md-icon>
+      </button>
+    </md-list-item>
+  </md-nav-list>
+  
+</div>
