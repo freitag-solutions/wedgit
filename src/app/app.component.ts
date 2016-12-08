@@ -8,16 +8,16 @@ import { MdInput } from '@angular/material';
 })
 export class AppComponent {
   searchPlaceholder = 'wedg.it';
-  messages = [];
+  searchResults = [];
 
   @ViewChild('main') main: ElementRef;
   @ViewChild('searchInput') searchInput: MdInput;
 
   triggerSearch() {
-    var msgs = [];
+    var results = [];
     for (var i=0; i<(this.searchInput.value as string).length; i++)
-      msgs.push("a");
-    this.messages = msgs;
+      results.push("a");
+    this.searchResults = results;
   }
 
   ngOnInit() {
