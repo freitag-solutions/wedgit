@@ -1,13 +1,14 @@
 <div #main (resize)="onResize($event)">
-  <md-toolbar>
+  
+  <md-toolbar class="mainbar">
 
     <md-icon>search</md-icon>
 
-    <md-input #searchInput placeholder="{{searchPlaceholder}}" floatingPlaceholder="false" class="main searchbar" (input)="triggerSearch()"></md-input>
+    <md-input #searchInput placeholder="{{searchPlaceholder}}" floatingPlaceholder="false" class="search" (input)="triggerSearch()" ></md-input>
 
   </md-toolbar>
 
-  <md-nav-list *ngIf="searchResults.length >  0">
+  <md-nav-list class="mainlist" *ngIf="searchResults.length >  0">
     <md-list-item *ngFor="let result of searchResults">
       <a md-line href="...">{{ result }}</a>
         <button md-icon-button (click)="showInfo(result)">
