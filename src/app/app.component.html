@@ -1,19 +1,27 @@
-<div #main (resize)="onResize($event)">
+<div #main
+  (keydown.arrowup)="up($event)" 
+  (keydown.arrowdown)="down($event)"
+  (keyup.enter)="triggerAction()">
   
   <md-toolbar class="mainbar">
 
     <md-icon>search</md-icon>
 
-    <md-input #searchInput autofocus placeholder="{{searchPlaceholder}}" floatingPlaceholder="false" class="search" (input)="triggerSearch()" (keyup.esc)="minimize()"></md-input>
+    <md-input #searchInput autofocus placeholder="{{searchPlaceholder}}" floatingPlaceholder="false" class="search" 
+      (input)="triggerSearch()" 
+      (keyup.esc)="minimize()"></md-input>
 
   </md-toolbar>
 
+  <!-- TODO: replace md-nav-list with md-selection-list as soon as it's available -->
   <md-nav-list class="mainlist" *ngIf="searchResults.length >  0">
-    <md-list-item *ngFor="let result of searchResults">
-      <a md-line href="...">{{ result }}</a>
-        <button md-icon-button (click)="showInfo(result)">
-            <md-icon>info</md-icon>
-        </button>
+    <md-list-item #result *ngFor="let searchResult of searchResults"
+      (mouseenter)="selectElement($event)">
+      <a md-line>{{ searchResult }}</a>
+        <!--<button md-icon-button
+          (click)="showInfo(searchResult)">
+          <md-icon>info</md-icon>
+        </button>-->
       </md-list-item>
   </md-nav-list>
 
