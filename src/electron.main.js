@@ -1,4 +1,5 @@
 const {app, BrowserWindow, Tray, Menu, globalShortcut } = require('electron');
+const electronDebug = require('electron-debug');
 
 // config
 const iconPath = `${__dirname}/../dist/favicon.ico`;
@@ -8,11 +9,21 @@ const iconPath = `${__dirname}/../dist/favicon.ico`;
 let win;
 
 function showWindow() {
-  win.show();
-  win.focus();
+  win.show(); // also sets focus
 }
 function hideWindow() {
-  win.hide();
+  win.hide(); // send to tray
+}
+function toggleWindow() {
+  if (!win.isVisible() || !win.isFocused()) {
+    showWindow();
+  } else {
+    hideWindow();
+  }
+}
+function showDevTools() {
+  win.show();
+  electronDebug.openDevTools(win, "undocked");
 }
 
 function createWindow() {
@@ -37,26 +48,29 @@ function createWindow() {
   appIcon.setToolTip('wedg.it');
 
   appIcon.on('click', () => {
-    if (!win.isVisible()) {
-      showWindow();
-    } else {
-      hideWindow();
-    }
+    toggleWindow();
   });
 
   var contextMenu = Menu.buildFromTemplate([
     {
+      label: 'Toggle DevTools',
+      accelerator: 'CommandOrControl+Shift+I',
+      click: function() {
+        showDevTools();
+      }
+    },
+    {
       label: 'Quit',
-      //accelerator: 'CommandOrControl+Q', // TODO: fix
       role: 'quit'
     }
   ]);
   appIcon.setContextMenu(contextMenu);
+  Menu.setApplicationMenu(contextMenu); // also register as application menu for registering 'accelerator's 
 
 
   // Register global shortcut
   if (!globalShortcut.register('CommandOrControl+Q', () => {
-    showWindow();
+    toggleWindow();
   })) {
     console.log('Global shortcut registration failed');
   }
