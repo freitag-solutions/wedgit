@@ -1,4 +1,4 @@
-const {app, BrowserWindow, Tray, Menu } = require('electron');
+const {app, BrowserWindow, Tray, Menu, globalShortcut } = require('electron');
 
 // config
 const iconPath = `${__dirname}/../dist/favicon.ico`;
@@ -6,6 +6,14 @@ const iconPath = `${__dirname}/../dist/favicon.ico`;
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win;
+
+function showWindow() {
+  win.show();
+  win.focus();
+}
+function hideWindow() {
+  win.hide();
+}
 
 function createWindow() {
   // Create the browser window.
@@ -30,10 +38,9 @@ function createWindow() {
 
   appIcon.on('click', () => {
     if (!win.isVisible()) {
-      win.show();
-      win.focus();
+      showWindow();
     } else {
-      win.hide();
+      hideWindow();
     }
   });
 
@@ -45,6 +52,14 @@ function createWindow() {
     }
   ]);
   appIcon.setContextMenu(contextMenu);
+
+
+  // Register global shortcut
+  if (!globalShortcut.register('CommandOrControl+Q', () => {
+    showWindow();
+  })) {
+    console.log('Global shortcut registration failed');
+  }
 }
 
 // This method will be called when Electron has finished
