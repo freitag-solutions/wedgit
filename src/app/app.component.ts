@@ -20,6 +20,10 @@ export class AppComponent {
     this.searchResults = results;
   }
 
+  minimize() {
+    (window as any).app.minimize();
+  }
+
   ngOnInit() {
   }
 }

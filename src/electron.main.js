@@ -1,8 +1,7 @@
-const electron = require('electron');
-// Module to control application life.
-const {app} = electron;
-// Module to create native browser window.
-const {BrowserWindow} = electron;
+const {app, BrowserWindow, Tray, Menu } = require('electron');
+
+// config
+const iconPath = `${__dirname}/../dist/favicon.ico`;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -11,12 +10,10 @@ let win;
 function createWindow() {
   // Create the browser window.
   // see: https://github.com/electron/electron/blob/master/docs/api/frameless-window.md
-  win = new BrowserWindow({ width: 600, height: 74, useContentSize: true, frame: false, transparent: false, resizable: false });
-
+  win = new BrowserWindow({ width: 600, height: 74, useContentSize: true, frame: false, transparent: false, resizable: false, alwaysOnTop: false });
 
   // and load the index.html of the app.
   win.loadURL(`file://${__dirname}/../dist/index.html`);
-
 
   // Emitted when the window is closed.
   win.on('closed', () => {
@@ -25,6 +22,29 @@ function createWindow() {
     // when you should delete the corresponding element.
     win = null;
   });
+
+
+  // Create tray icon
+  appIcon = new Tray(iconPath);
+  appIcon.setToolTip('wedg.it');
+
+  appIcon.on('click', () => {
+    if (!win.isVisible()) {
+      win.show();
+      win.focus();
+    } else {
+      win.hide();
+    }
+  });
+
+  var contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Quit',
+      //accelerator: 'CommandOrControl+Q', // TODO: fix
+      role: 'quit'
+    }
+  ]);
+  appIcon.setContextMenu(contextMenu);
 }
 
 // This method will be called when Electron has finished
