@@ -1,5 +1,6 @@
 import { Component, ViewChild, ViewChildren, ElementRef, QueryList } from '@angular/core';
 import { MdInput, MdListItem } from '@angular/material';
+import { IWedgeItem } from '../models/IWedgeItem';
 
 @Component({
   selector: 'app-root',
@@ -8,7 +9,7 @@ import { MdInput, MdListItem } from '@angular/material';
 })
 export class AppComponent {
   searchPlaceholder = 'wedg.it';
-  searchResults = [];
+  searchResults: IWedgeItem[] = [];
   index = -1;
 
   @ViewChild('main') main: ElementRef;
@@ -16,14 +17,16 @@ export class AppComponent {
   @ViewChildren('result') resultsList: QueryList<MdListItem>;
 
   triggerSearch() {
-    var results = [];
-    for (var i=0; i<(this.searchInput.value as string).length; i++)
-      results.push("a");
-    this.searchResults = results;
+    var query = this.searchInput.value;
+    this.searchResults = (window as any).app.triggerSearch(query);
   }
   triggerAction() {
-    console.log("triggered #" + this.index);
-    alert("triggered #" + this.index);
+    if (this.index < 0 || this.index >= this.searchResults.length) {
+      return;
+    }
+
+    var searchResult = this.searchResults[this.index];
+    (window as any).app.triggerAction(searchResult.wedge, searchResult.uri);
   }
 
   up(event: Event) {

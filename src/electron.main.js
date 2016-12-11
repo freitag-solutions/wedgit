@@ -98,5 +98,10 @@ app.on('activate', function () {
   }
 })
 
+global.wedgesDirectory = "wedges";
+if (process.argv.length > 2) {
+  global.wedgesDirectory = process.argv[2];
+}
+
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.

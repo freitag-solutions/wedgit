@@ -32,3 +32,8 @@ To get more help on the `angular-cli` use `ng --help` or go check out the [Angul
 
 ## Electron
 Run `npm start`
+
+## Wedges
+Wedges are loaded from the `wedges` sub-directory in the the application's installation directory by default. If available, the first command line argument is used as directory instead.    
+
+For debugging (with `npm start`), wedges are loaded from `wedges` (relative to the repository). 

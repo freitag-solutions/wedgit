@@ -17,7 +17,7 @@
   <md-nav-list class="mainlist" *ngIf="searchResults.length >  0">
     <md-list-item #result *ngFor="let searchResult of searchResults"
       (mouseenter)="selectElement($event)">
-      <a md-line>{{ searchResult }}</a>
+      <a md-line>{{ searchResult.title }}</a>
         <!--<button md-icon-button
           (click)="showInfo(searchResult)">
           <md-icon>info</md-icon>
