@@ -36,6 +36,7 @@
     "@types/jasmine": "2.5.38",
     "@types/node": "^6.0.42",
     "angular-cli": "1.0.0-beta.21",
+    "awesome-typescript-loader": "^3.0.0-beta.14",
     "codelyzer": "~1.0.0-beta.3",
     "electron-prebuilt": "^1.4.10",
     "jasmine-core": "2.5.2",
@@ -48,7 +49,7 @@
     "protractor": "4.0.9",
     "ts-node": "1.2.1",
     "tslint": "3.13.0",
-    "typescript": "~2.0.3",
+    "typescript": "^2.1.4",
     "webdriver-manager": "10.2.5"
   }
 }
