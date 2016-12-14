@@ -5,7 +5,10 @@
   
   <md-toolbar class="mainbar">
 
-    <md-icon>search</md-icon>
+    <div class="icon" style="display: inline-block;">
+      <md-icon *ngIf="!working">search</md-icon>
+      <md-spinner *ngIf="working"></md-spinner>
+    </div>
 
     <md-input #searchInput autofocus placeholder="{{searchPlaceholder}}" floatingPlaceholder="false" class="search" 
       (input)="triggerSearch()" 
@@ -15,7 +18,7 @@
 
   <!-- TODO: replace md-nav-list with md-selection-list as soon as it's available -->
   <md-nav-list class="mainlist" *ngIf="searchResults.length >  0">
-    <md-list-item #result *ngFor="let searchResult of searchResults"
+    <md-list-item #result *ngFor="let searchResult of searchResults; trackBy searchResult?.uri"
       (mouseenter)="selectElement($event)">
       <a md-line>{{ searchResult.title }}</a>
         <!--<button md-icon-button

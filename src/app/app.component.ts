@@ -1,6 +1,7 @@
 import { Component, ViewChild, ViewChildren, ElementRef, QueryList } from '@angular/core';
 import { MdInput, MdListItem } from '@angular/material';
-import { IWedgeItem } from '../models/IWedgeItem';
+import { WedgeItem } from '../models/WedgeItem';
+import { Subject } from '@reactivex/rxjs';
 
 @Component({
   selector: 'app-root',
@@ -9,16 +10,33 @@ import { IWedgeItem } from '../models/IWedgeItem';
 })
 export class AppComponent {
   searchPlaceholder = 'wedg.it';
-  searchResults: IWedgeItem[] = [];
+  searchResults: WedgeItem[] = [];
   index = -1;
+  working = false;
 
   @ViewChild('main') main: ElementRef;
   @ViewChild('searchInput') searchInput: MdInput;
   @ViewChildren('result') resultsList: QueryList<MdListItem>;
 
   triggerSearch() {
-    var query = this.searchInput.value;
-    this.searchResults = (window as any).app.triggerSearch(query);
+    this.working = true;
+    
+    let query = this.searchInput.value;
+    var results = new Subject<WedgeItem>();
+    
+    this.searchResults = [];
+    results
+      .bufferTime(100) // see: https://github.com/Reactive-Extensions/RxJS/tree/master/doc/api/core/operators
+      .filter(wedgeItems => wedgeItems.length > 0)
+      .subscribe(
+        wedgeItems => {
+          console.debug("Received WedgeItems", wedgeItems);
+          this.searchResults = this.searchResults.concat(wedgeItems);
+        },
+        () => {this.working = false; console.log("JOO");},
+        () => {this.working = false;console.log("NOOO");});
+
+    (window as any).app.triggerSearch(query, results);
   }
   triggerAction() {
     if (this.index < 0 || this.index >= this.searchResults.length) {

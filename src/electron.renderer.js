@@ -69,11 +69,9 @@ window.app = {
         electron.getCurrentWindow().hide();
     },
 
-    "triggerSearch": function(query) {
+    "triggerSearch": function(query, results) {
         console.info(`Triggering search: '${query}'`);
         
-        var results = [];
-
         // load wedges
         var wedges = loadWedges();
 
@@ -82,27 +80,20 @@ window.app = {
             var wedge = wedges[key];
 
             // search 
-            var wedgeItems = wedge.search(query);
+            wedge.search(query, results);
 
             // sanitize results
-            wedgeItems = wedgeItems.filter(function (item) {
-                if (!(typeof(item.uri) === "string" && typeof(item.title) === "string")) { // validate interface 
-                    console.warn(`Skipped illegal search result from '${key}', not of type IWedgeItem`, item);
-                    return false;
-                }
-                return true;
-            });
-            wedgeItems.forEach(function (item) {
-                item.wedge = key;
-            });
-
-            // add to global search results
-            results = results.concat(wedgeItems);
+            // wedgeItems = wedgeItems.filter(function (item) {
+            //     if (!(typeof(item.uri) === "string" && typeof(item.title) === "string")) { // validate interface 
+            //         console.warn(`Skipped illegal search result from '${key}', not of type IWedgeItem`, item);
+            //         return false;
+            //     }
+            //     return true;
+            // });
+            // wedgeItems.forEach(function (item) {
+            //     item.wedge = key;
+            // });
         }
-
-        console.debug("Loaded search results", results);
-
-        return results;
     },
 
     "triggerAction": function(wedge, uri) {
