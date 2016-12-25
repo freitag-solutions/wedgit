@@ -1,4 +1,4 @@
-import { Component, ViewChild, ViewChildren, ElementRef, QueryList } from '@angular/core';
+import { Component, ViewChild, ViewChildren, ElementRef, QueryList, ChangeDetectorRef } from '@angular/core';
 import { MdInput, MdListItem } from '@angular/material';
 import { WedgeItem } from '../models/WedgeItem';
 import { Subject } from '@reactivex/rxjs';
@@ -18,6 +18,10 @@ export class AppComponent {
   @ViewChild('searchInput') searchInput: MdInput;
   @ViewChildren('result') resultsList: QueryList<MdListItem>;
 
+  constructor(private ref: ChangeDetectorRef) {
+
+  }
+
   triggerSearch() {
     this.working = true;
     
@@ -32,9 +36,16 @@ export class AppComponent {
         wedgeItems => {
           console.debug("Received WedgeItems", wedgeItems);
           this.searchResults = this.searchResults.concat(wedgeItems);
+          this.ref.detectChanges();
         },
-        () => {this.working = false; console.log("JOO");},
-        () => {this.working = false;console.log("NOOO");});
+        () => {
+          this.working = false; 
+          this.ref.detectChanges();
+        },
+        () => {
+          this.working = false; 
+          this.ref.detectChanges();
+        });
 
     (window as any).app.triggerSearch(query, results);
   }
