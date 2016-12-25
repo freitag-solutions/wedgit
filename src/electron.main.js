@@ -1,8 +1,16 @@
-const {app, BrowserWindow, Tray, Menu, globalShortcut } = require('electron');
+const {app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain } = require('electron');
 const electronDebug = require('electron-debug');
+
+const { Subject } = require('@reactivex/rxjs');
+const path = require('path');
+const fs = require('fs');
 
 // config
 const iconPath = `${__dirname}/../dist/favicon.ico`;
+let wedgesDirectory  = "wedges";
+if (process.argv.length > 2) {
+  wedgesDirectory = process.argv[2];
+}
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -98,10 +106,75 @@ app.on('activate', function () {
   }
 })
 
-global.wedgesDirectory = "wedges";
-if (process.argv.length > 2) {
-  global.wedgesDirectory = process.argv[2];
+console.debug = console.log;
+function loadWedges() {
+    console.debug("Loading wedges");
+    
+    var wedges = {};
+
+    // scan through 'wedgesDirectory'
+    var modulesDir = path.resolve(wedgesDirectory);
+    console.debug(`Scanning for wedges in '${modulesDir}'`);
+    fs.readdirSync(modulesDir).forEach(function(file) {
+        // load modules 
+        var moduleDir = path.join(modulesDir, file);
+        console.debug(`Loading wedges from '${moduleDir}'`);
+        try {
+            var module = require(moduleDir);
+
+            // load wedges
+            var moduleWedges = module.wedges; 
+            if (!(moduleWedges instanceof Object)) { // validate interface 
+                console.warn(`Could not load wedges from '${moduleDir}', module should export a 'wedges' dictionary of kind {key: IWedge}`);
+                return;
+            }
+
+            // merge all wedges into global dictionary, overwrite existing keys
+            for (var key in moduleWedges) {
+                var wedge = moduleWedges[key];
+
+                if (!(typeof(wedge.search) === "function" && typeof(wedge.action) === "function")) { // validate interface 
+                    console.warn(`Could not load wedge '${key}' from '${moduleDir}', not of type IWedge`, wedge);
+                    continue;
+                }
+
+                if ((key in wedges)) {
+                    console.warn(`Duplicate wedge with key '${key}' (loaded from '${moduleDir}')`);
+                }
+
+                wedges[key] = moduleWedges[key]; 
+                console.debug(`Loaded wedge '${key}' from '${moduleDir}'`);
+            }
+        } catch (err) { 
+            console.warn(`Loading wedges from '${moduleDir}' FAILED`, err);
+        }
+    });
+
+    console.info("Loaded wedges", Object.keys(wedges));
+
+    return wedges;
 }
+ipcMain.on('search', function (event, query) {
+  console.info(`Triggering search: '${query}'`);
+
+  // load wedges
+  var wedges = loadWedges();
+
+  // trigger search in all wedges
+  var results = new Subject();
+  results
+    .subscribe(
+      wedgeItem => { event.sender.send('searchProgress', wedgeItem); }, // TODO: sanitize/typecheck results?
+      () => { event.sender.send('searchFinished'); },
+      () => { event.sender.send('searchFinished'); });
+
+  for (var key in wedges) {
+    var wedge = wedges[key];
+
+    // search 
+    wedge.search(query, results);
+  }
+});
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.

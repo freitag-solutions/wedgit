@@ -24,11 +24,10 @@ export class AppComponent {
 
   triggerSearch() {
     this.working = true;
+    this.searchResults = [];
     
     let query = this.searchInput.value;
     var results = new Subject<WedgeItem>();
-    
-    this.searchResults = [];
     results
       .bufferTime(100) // see: https://github.com/Reactive-Extensions/RxJS/tree/master/doc/api/core/operators
       .filter(wedgeItems => wedgeItems.length > 0)

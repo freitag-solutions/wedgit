@@ -2,57 +2,8 @@
 // node.js modules can only be accessed from this file, node.js modules are stripped from all other files by angular-cli/webpack. 
 
 var electron = require('electron').remote;
+var ipcRenderer = require('electron').ipcRenderer;
 var elementResizeEvent = require('element-resize-event'); // https://github.com/KyleAMathews/element-resize-event
-var path = require('path');
-var fs = require('fs');
-
-function loadWedges() {
-    console.debug("Loading wedges");
-    
-    var wedges = {};
-
-    // scan through 'wedgesDirectory'
-    var modulesDir = path.resolve(electron.getGlobal('wedgesDirectory'));
-    console.debug(`Scanning for wedges in '${modulesDir}'`);
-    fs.readdirSync(modulesDir).forEach(function(file) {
-        // load modules 
-        var moduleDir = path.join(modulesDir, file);
-        console.debug(`Loading wedges from '${moduleDir}'`);
-        try {
-            var module = require(moduleDir);
-
-            // load wedges
-            var moduleWedges = module.wedges; 
-            if (!(moduleWedges instanceof Object)) { // validate interface 
-                console.warn(`Could not load wedges from '${moduleDir}', module should export a 'wedges' dictionary of kind {key: IWedge}`);
-                return;
-            }
-
-            // merge all wedges into global dictionary, overwrite existing keys
-            for (var key in moduleWedges) {
-                var wedge = moduleWedges[key];
-
-                if (!(typeof(wedge.search) === "function" && typeof(wedge.action) === "function")) { // validate interface 
-                    console.warn(`Could not load wedge '${key}' from '${moduleDir}', not of type IWedge.`);
-                    continue;
-                }
-
-                if ((key in wedges)) {
-                    console.warn(`Duplicate wedge with key '${key}' (loaded from '${moduleDir}')`);
-                }
-
-                wedges[key] = moduleWedges[key]; 
-                console.debug(`Loaded wedge '${key}' from '${moduleDir}'`);
-            }
-        } catch (err) { 
-            console.warn(`Loading wedges from '${moduleDir}' FAILED`, err);
-        }
-    });
-
-    console.info("Loaded wedges", Object.keys(wedges));
-
-    return wedges;
-}
 
 // auto-resize window to dynamically fit its contents
 setTimeout(function() {
@@ -71,29 +22,17 @@ window.app = {
 
     "triggerSearch": function(query, results) {
         console.info(`Triggering search: '${query}'`);
+
+        ipcRenderer.on('searchProgress', function(event, arg) {
+            console.debug("searchProgress", arg);
+            results.next(arg);
+        });
+        ipcRenderer.on('searchFinished', function(event) {
+            console.debug("searchFinished");
+            results.complete();
+        });
         
-        // load wedges
-        var wedges = loadWedges();
-
-        // trigger search in all wedges
-        for (var key in wedges) {
-            var wedge = wedges[key];
-
-            // search 
-            wedge.search(query, results);
-
-            // sanitize results
-            // wedgeItems = wedgeItems.filter(function (item) {
-            //     if (!(typeof(item.uri) === "string" && typeof(item.title) === "string")) { // validate interface 
-            //         console.warn(`Skipped illegal search result from '${key}', not of type IWedgeItem`, item);
-            //         return false;
-            //     }
-            //     return true;
-            // });
-            // wedgeItems.forEach(function (item) {
-            //     item.wedge = key;
-            // });
-        }
+        ipcRenderer.send('search', query);
     },
 
     "triggerAction": function(wedge, uri) {
